@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CEJUME · Defensoría Civil 6</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Roboto',sans-serif; background:#e8edf5; padding:1.5rem; color:#1e2a3a; }
+    .container { max-width:1280px; margin:0 auto; background:#fff; border-radius:28px; box-shadow:0 12px 35px rgba(10,47,90,0.15); padding:2rem 1.8rem 2.5rem; }
+    .header { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:4px solid #0a2f5a; padding-bottom:1rem; }
+    .header h1 { font-weight:500; font-size:1.7rem; color:#0a2f5a; letter-spacing:-0.3px; line-height:1.3; }
+    .header h1 i { color:#0a2f5a; margin-right:0.5rem; }
+    .header-actions { display:flex; gap:0.8rem; flex-wrap:wrap; }
+    .btn { font-family:'Roboto',sans-serif; font-weight:500; padding:0.6rem 1.4rem; border:none; border-radius:60px; font-size:0.95rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.5rem; transition:background 0.2s, transform 0.1s; background:#e9edf4; color:#0a2f5a; }
+    .btn-primary { background:#0a2f5a; color:#fff; }
+    .btn-primary:hover { background:#0d3d70; }
+    .btn-secondary { background:#e9edf4; color:#0a2f5a; }
+    .btn-secondary:hover { background:#d0d9e6; }
+    .btn-success { background:#1a5a3a; color:#fff; }
+    .btn-success:hover { background:#1f6e47; }
+    .btn-calendar { background:#6f42c1; color:#fff; }
+    .btn-calendar:hover { background:#5a32a3; }
+    .btn-report { background:#e6852b; color:#fff; }
+    .btn-report:hover { background:#d0741e; }
+    .btn:active { transform:scale(0.97); }
+    .filters-container { display:flex; flex-wrap:wrap; align-items:flex-end; gap:1.2rem; margin-bottom:1.5rem; padding:1rem 1.2rem; background:#f1f5f9; border-radius:18px; border:1px solid #d0d9e6; }
+    .filter-group { display:flex; flex-direction:column; gap:0.3rem; }
+    .filter-group label { font-weight:500; font-size:0.85rem; color:#1e2a3a; }
+    .filter-group select, .filter-group input { padding:0.4rem 0.8rem; border:1px solid #bcc9db; border-radius:30px; font-family:'Roboto',sans-serif; font-size:0.9rem; background:#fafcff; transition:border 0.2s; min-width:160px; }
+    .filter-group select:focus, .filter-group input:focus { outline:none; border-color:#0a2f5a; box-shadow:0 0 0 3px rgba(10,47,90,0.15); }
+    .filter-actions { display:flex; gap:0.6rem; align-items:center; margin-left:auto; }
+    .table-responsive { overflow-x:auto; margin-top:0.5rem; border-radius:18px; border:1px solid #cbd5e0; }
+    table { width:100%; border-collapse:collapse; font-size:0.95rem; min-width:750px; }
+    thead { background:#0a2f5a; color:#fff; }
+    th { padding:1rem 0.9rem; text-align:left; font-weight:500; letter-spacing:0.3px; white-space:nowrap; }
+    td { padding:0.8rem 0.9rem; border-bottom:1px solid #e2e8f0; vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tbody tr:hover { background:#f1f5f9; }
+    .select-abogado, .select-estado { border:1px solid #bcc9db; border-radius:30px; padding:0.4rem 0.8rem; font-family:'Roboto',sans-serif; font-size:0.9rem; background:#fafcff; cursor:pointer; width:100%; min-width:150px; transition:border 0.2s, box-shadow 0.2s; appearance:auto; }
+    .select-abogado:focus, .select-estado:focus { outline:none; border-color:#0a2f5a; box-shadow:0 0 0 3px rgba(10,47,90,0.2); }
+    .estado-cumplido { color:#198754; font-weight:700; }
+    .estado-reprogramado { color:#6f42c1; font-weight:500; }
+    .estado-suspendido { color:#dc3545; font-weight:500; }
+    .estado-finalizado { color:#0d6efd; font-weight:500; }
+    .estado-pendiente { color:#6c757d; font-weight:400; }
+    .table-footer { display:flex; justify-content:space-between; align-items:center; margin-top:1rem; font-size:0.9rem; color:#3a4a5a; flex-wrap:wrap; gap:0.5rem; }
+    .badge-count { background:#0a2f5a; color:#fff; padding:0.2rem 0.8rem; border-radius:60px; font-weight:500; }
+    .pagination-wrapper { display:flex; justify-content:center; align-items:center; gap:0.8rem; margin-top:1.5rem; flex-wrap:wrap; }
+    .pagination-wrapper .page-info { font-size:0.9rem; color:#1e2a3a; font-weight:500; }
+    .pagination-wrapper .btn-pagination { background:#e9edf4; border:none; border-radius:30px; padding:0.4rem 1rem; font-weight:500; color:#0a2f5a; cursor:pointer; transition:background 0.2s; font-size:0.9rem; }
+    .pagination-wrapper .btn-pagination:hover:not(:disabled) { background:#d0d9e6; }
+    .pagination-wrapper .btn-pagination:disabled { opacity:0.5; cursor:not-allowed; }
+    .pagination-wrapper .page-numbers { display:flex; gap:0.3rem; }
+    .pagination-wrapper .page-numbers .page-num { background:#e9edf4; border:none; border-radius:30px; padding:0.4rem 0.8rem; font-weight:500; color:#0a2f5a; cursor:pointer; transition:background 0.2s; font-size:0.9rem; min-width:2.2rem; text-align:center; }
+    .pagination-wrapper .page-numbers .page-num.active { background:#0a2f5a; color:#fff; }
+    .pagination-wrapper .page-numbers .page-num:hover:not(.active) { background:#d0d9e6; }
+    .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(10,47,90,0.5); z-index:1000; justify-content:center; align-items:center; padding:1rem; }
+    .modal-overlay.active { display:flex; }
+    .modal-box { background:#fff; border-radius:24px; max-width:800px; width:100%; max-height:90vh; padding:2rem 2rem 1.8rem; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow-y:auto; position:relative; }
+    .modal-box h2 { font-weight:500; color:#0a2f5a; margin-bottom:1.2rem; display:flex; align-items:center; gap:0.5rem; border-bottom:2px solid #e9edf4; padding-bottom:0.7rem; }
+    .modal-close { position:absolute; top:1rem; right:1.5rem; font-size:1.8rem; cursor:pointer; color:#6c8db0; transition:color 0.2s; background:none; border:none; }
+    .modal-close:hover { color:#0a2f5a; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem 1.5rem; }
+    .form-group { display:flex; flex-direction:column; gap:0.3rem; }
+    .form-group label { font-weight:500; font-size:0.9rem; color:#1e2a3a; }
+    .form-group input, .form-group select { padding:0.6rem 0.8rem; border:1px solid #bcc9db; border-radius:30px; font-family:'Roboto',sans-serif; font-size:0.95rem; background:#fafcff; transition:border 0.2s; }
+    .form-group input:focus, .form-group select:focus { outline:none; border-color:#0a2f5a; box-shadow:0 0 0 3px rgba(10,47,90,0.15); }
+    .form-actions { grid-column:1/-1; display:flex; justify-content:flex-end; gap:0.8rem; margin-top:0.5rem; }
+    .calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:0.5rem; margin:1rem 0; }
+    .calendar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
+    .calendar-header .month-year { font-size:1.2rem; font-weight:500; color:#0a2f5a; }
+    .calendar-header .btn-nav { background:none; border:none; font-size:1.2rem; cursor:pointer; color:#0a2f5a; padding:0.2rem 0.8rem; border-radius:30px; transition:background 0.2s; }
+    .calendar-header .btn-nav:hover { background:#e9edf4; }
+    .calendar-weekday { font-weight:500; text-align:center; color:#3a4a5a; padding:0.3rem 0; }
+    .calendar-day { background:#f8fafc; border-radius:12px; padding:0.5rem 0.3rem; text-align:center; cursor:pointer; transition:background 0.2s; border:1px solid #e2e8f0; min-height:60px; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+    .calendar-day:hover { background:#e9edf4; }
+    .calendar-day .day-number { font-weight:500; font-size:1.1rem; color:#1e2a3a; }
+    .calendar-day .day-badge { background:#0a2f5a; color:#fff; border-radius:30px; padding:0.05rem 0.5rem; font-size:0.7rem; font-weight:500; margin-top:0.2rem; }
+    .calendar-day.empty { background:transparent; border:none; cursor:default; }
+    .calendar-day.has-audiencias { border-color:#0a2f5a; border-width:2px; }
+    .calendar-detail-panel { margin-top:1rem; border-top:1px solid #e2e8f0; padding-top:1rem; max-height:200px; overflow-y:auto; }
+    .calendar-detail-panel h4 { color:#0a2f5a; margin-bottom:0.5rem; }
+    .calendar-detail-panel ul { list-style:none; padding:0; }
+    .calendar-detail-panel ul li { padding:0.3rem 0; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; font-size:0.9rem; }
+    .calendar-detail-panel ul li .detalle-estado { font-weight:500; }
+    .report-stats { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-top:0.5rem; }
+    .report-stats h4 { color:#0a2f5a; margin-bottom:0.5rem; border-bottom:1px solid #e9edf4; padding-bottom:0.3rem; }
+    .report-stats ul { list-style:none; padding:0; }
+    .report-stats ul li { display:flex; justify-content:space-between; padding:0.3rem 0; border-bottom:1px solid #f0f0f0; font-size:0.9rem; }
+    .report-stats ul li .badge-estado { display:inline-block; padding:0.1rem 0.6rem; border-radius:30px; font-weight:500; font-size:0.8rem; }
+    .badge-estado.suspendido { background:#f8d7da; color:#721c24; }
+    .badge-estado.finalizado { background:#cce5ff; color:#004085; }
+    .badge-estado.cumplido { background:#d4edda; color:#155724; }
+    .badge-estado.reprogramado { background:#e8d4f5; color:#4a148c; }
+    .badge-estado.pendiente { background:#e2e3e5; color:#383d41; }
+    .report-month-nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
+    .print-container { display:none; }
+
+    @media (max-width:700px) {
+      .container { padding:1.2rem; }
+      .header { flex-direction:column; align-items:stretch; gap:1rem; }
+      .header-actions { justify-content:stretch; }
+      .btn { justify-content:center; flex:1; }
+      .filters-container { flex-direction:column; align-items:stretch; }
+      .filter-group select, .filter-group input { min-width:100%; }
+      .filter-actions { margin-left:0; }
+      th, td { padding:0.5rem 0.4rem; font-size:0.85rem; }
+      .select-abogado, .select-estado { min-width:100px; font-size:0.8rem; padding:0.3rem 0.5rem; }
+      .form-grid { grid-template-columns:1fr; }
+      .modal-box { padding:1.5rem; }
+      .pagination-wrapper { gap:0.4rem; }
+      .pagination-wrapper .page-numbers .page-num { padding:0.2rem 0.5rem; min-width:1.8rem; font-size:0.8rem; }
+      .calendar-grid { gap:0.3rem; }
+      .calendar-day { min-height:45px; padding:0.2rem; }
+      .calendar-day .day-number { font-size:0.9rem; }
+      .report-stats { grid-template-columns:1fr; }
+    }
+    @media print {
+      body * { visibility:hidden; }
+      .print-container, .print-container * { visibility:visible; }
+      .print-container { display:block !important; position:absolute; top:0; left:0; width:100%; padding:0.5in 0.3in; background:#fff; font-family:'Roboto',sans-serif; }
+      .print-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.8rem; flex-wrap:wrap; border-bottom:2px solid #0a2f5a; padding-bottom:0.5rem; }
+      .print-header h2 { font-weight:500; color:#0a2f5a; margin:0; font-size:1.2rem; }
+      .print-header .print-datetime { color:#3a4a5a; font-weight:400; font-size:0.85rem; }
+      .print-table-wrap { border:1px solid #000; border-radius:0; overflow:visible !important; width:100%; }
+      .print-table-wrap table { width:100%; border-collapse:collapse; font-size:0.75rem; min-width:0; }
+      .print-table-wrap th, .print-table-wrap td { padding:0.3rem 0.4rem; border:1px solid #000; text-align:left; vertical-align:middle; }
+      .print-table-wrap thead { background:#0a2f5a !important; color:#fff !important; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+      .print-table-wrap th { background:#0a2f5a !important; color:#fff !important; font-weight:500; }
+      .print-table-wrap td { background:#fff !important; color:#000 !important; }
+      .print-table-wrap table { font-size:0.7rem; }
+      .print-table-wrap th, .print-table-wrap td { padding:0.2rem 0.3rem; }
+      .no-print, .no-print * { display:none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1><i class="fas fa-gavel"></i> CEJUME Audiencias-Defensoria Civil y Comercial 6<br /><span style="font-size:0.9rem;font-weight:400;color:#4a5a6a;">Ministerio Público de Misiones</span></h1>
+    <div class="header-actions">
+      <button class="btn btn-calendar" id="calendarBtn"><i class="fas fa-calendar-alt"></i> Cejume - Calendario</button>
+      <button class="btn btn-report" id="reportBtn"><i class="fas fa-chart-pie"></i> Cejume - Reporte Mensual</button>
+      <button class="btn btn-success" id="newRegBtn"><i class="fas fa-plus-circle"></i> Cejume - Nuevo Registro</button>
+      <button class="btn btn-secondary" id="resetBtn"><i class="fas fa-undo-alt"></i> Restablecer</button>
+      <button class="btn btn-primary" id="printBtn"><i class="fas fa-print"></i> Imprimir</button>
+    </div>
+  </div>
+
+  <div class="filters-container no-print">
+    <div class="filter-group">
+      <label for="filterAbogado"><i class="fas fa-user"></i> Abogado</label>
+      <select id="filterAbogado"><option value="">Todos</option></select>
+    </div>
+    <div class="filter-group">
+      <label for="filterFecha"><i class="fas fa-calendar-day"></i> Fecha</label>
+      <input type="date" id="filterFecha" />
+    </div>
+    <div class="filter-actions">
+      <button class="btn btn-secondary" id="clearFilters"><i class="fas fa-times"></i> Limpiar</button>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table id="tablaAudiencias">
+      <thead><tr><th>Día</th><th>Fecha</th><th>Hora</th><th>Legajo</th><th>Representado/a</th><th>Abogado Asignado</th><th>Estado de Mediación</th></tr></thead>
+      <tbody id="tbodyAudiencias"></tbody>
+    </table>
+  </div>
+
+  <div class="pagination-wrapper no-print" id="paginationWrapper">
+    <button class="btn-pagination" id="prevPage" disabled><i class="fas fa-chevron-left"></i> Anterior</button>
+    <div class="page-numbers" id="pageNumbers"></div>
+    <button class="btn-pagination" id="nextPage">Siguiente <i class="fas fa-chevron-right"></i></button>
+    <span class="page-info" id="pageInfo">Mostrando 0-0 de 0</span>
+  </div>
+
+  <div class="table-footer">
+    <span><i class="fas fa-list-ul"></i> Total: <span class="badge-count" id="totalCount">0</span> audiencias</span>
+    <span class="no-print" style="color:#6c8db0;"><i class="fas fa-info-circle"></i> Edite los campos directamente</span>
+  </div>
+</div>
+
+<!-- Impresión -->
+<div class="print-container" id="printContainer">
+  <div class="print-header"><h2><i class="fas fa-gavel"></i> CEJUME · Defensoría Civil 6</h2><span class="print-datetime" id="printDatetime"></span></div>
+  <div class="print-table-wrap">
+    <table><thead><tr><th>Día</th><th>Fecha</th><th>Hora</th><th>Legajo</th><th>Representado/a</th><th>Abogado Asignado</th><th>Estado</th></tr></thead><tbody id="printTableBody"></tbody></table>
+  </div>
+</div>
+
+<!-- MODAL NUEVO REGISTRO -->
+<div class="modal-overlay" id="newRegModal">
+  <div class="modal-box">
+    <button class="modal-close" id="newRegClose">&times;</button>
+    <h2><i class="fas fa-plus-circle"></i> Cejume - Nueva Audiencia</h2>
+    <form id="newRegForm" class="form-grid">
+      <div class="form-group"><label for="newFecha">Fecha</label><input type="date" id="newFecha" required /></div>
+      <div class="form-group"><label for="newHora">Hora</label><input type="time" id="newHora" required /></div>
+      <div class="form-group"><label for="newLegajo">Legajo</label><input type="text" id="newLegajo" placeholder="Ej. 123456/2026" required /></div>
+      <div class="form-group"><label for="newRepresentado">Representado/a</label><input type="text" id="newRepresentado" placeholder="Nombre completo" required /></div>
+      <div class="form-group"><label for="newAbogado">Abogado Asignado</label><select id="newAbogado" required></select></div>
+      <div class="form-group"><label for="newEstado">Estado de Mediación</label>
+        <select id="newEstado" required>
+          <option value="">Seleccionar</option>
+          <option value="suspendido">Suspendido</option>
+          <option value="finalizado">Finalizado</option>
+          <option value="cumplido">Cumplido</option>
+          <option value="reprogramado">Reprogramado</option>
+          <option value="pendiente">Pendiente</option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" id="newRegCancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL CALENDARIO -->
+<div class="modal-overlay" id="calendarModal">
+  <div class="modal-box" style="max-width:850px;">
+    <button class="modal-close" id="calendarClose">&times;</button>
+    <h2><i class="fas fa-calendar-alt"></i> Cejume - Calendario de Audiencias</h2>
+    <div class="calendar-header">
+      <button class="btn-nav" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+      <span class="month-year" id="monthYear">Mes Año</span>
+      <button class="btn-nav" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div class="calendar-grid" id="calendarGrid"></div>
+    <div class="calendar-detail-panel"><h4>Detalles del día</h4><div id="calendarDetailList">Seleccione una fecha para ver los detalles.</div></div>
+  </div>
+</div>
+
+<!-- MODAL REPORTE MENSUAL -->
+<div class="modal-overlay" id="reportModal">
+  <div class="modal-box" style="max-width:750px;">
+    <button class="modal-close" id="reportClose">&times;</button>
+    <h2><i class="fas fa-chart-pie"></i> Cejume - Reporte Mensual</h2>
+    <div class="report-month-nav">
+      <button class="btn-nav" id="prevReportMonth"><i class="fas fa-chevron-left"></i></button>
+      <span class="month-year" id="reportMonthYear">Mes Año</span>
+      <button class="btn-nav" id="nextReportMonth"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div class="report-stats" id="reportStats">
+      <div><h4>Estados de Mediación</h4><ul id="reportEstadoList"></ul></div>
+      <div><h4>Audiencias por Abogado</h4><ul id="reportAbogadoList"></ul></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ===== CONFIGURACIÓN FIREBASE =====
+    const firebaseConfig = {
+      apiKey: "AIzaSyDSev2t20rZzjQMlX9WZKYYqNSk-B66wEU",
+      authDomain: "cejume.firebaseapp.com",
+      projectId: "cejume",
+      storageBucket: "cejume.firebasestorage.app",
+      messagingSenderId: "372396137836",
+      appId: "1:372396137836:web:9122e0e6d129d9beb5e749"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const coleccionRef = db.collection('audiencia-cejume');
+
+    // ===== CONSTANTES =====
+    const ABOGADOS = [
+      'Gonzalez Juan Jose',
+      'Gonzalez Alberto Misael',
+      'Corrales Alicia Mariela',
+      'Magnani Enzo Luciano',
+      'Rivero Patricia Soledad'
+    ];
+    const DEFAULT_ABOGADO = 'Gonzalez Juan Jose';
+    const RECORDS_PER_PAGE = 10;
+
+    // ===== ESTADO =====
+    let audiencias = [];
+    let currentPage = 1;
+    let totalPages = 1;
+    let filterAbogado = DEFAULT_ABOGADO;
+    let filterFecha = '';
+
+    // ===== DOM =====
+    const tbody = document.getElementById('tbodyAudiencias');
+    const totalCount = document.getElementById('totalCount');
+    const printTableBody = document.getElementById('printTableBody');
+    const printDatetime = document.getElementById('printDatetime');
+    const pageNumbers = document.getElementById('pageNumbers');
+    const pageInfo = document.getElementById('pageInfo');
+    const prevPageBtn = document.getElementById('prevPage');
+    const nextPageBtn = document.getElementById('nextPage');
+
+    const newRegModal = document.getElementById('newRegModal');
+    const calendarModal = document.getElementById('calendarModal');
+    const reportModal = document.getElementById('reportModal');
+    const calendarGrid = document.getElementById('calendarGrid');
+    const monthYear = document.getElementById('monthYear');
+    const calendarDetailList = document.getElementById('calendarDetailList');
+    let calendarCurrentDate = new Date();
+
+    const filterAbogadoEl = document.getElementById('filterAbogado');
+    const filterFechaEl = document.getElementById('filterFecha');
+    const clearFiltersBtn = document.getElementById('clearFilters');
+
+    const reportMonthYear = document.getElementById('reportMonthYear');
+    const reportEstadoList = document.getElementById('reportEstadoList');
+    const reportAbogadoList = document.getElementById('reportAbogadoList');
+    let reportCurrentDate = new Date();
+
+    // ===== AUXILIARES =====
+    function formatearFecha(fechaStr) {
+      if (!fechaStr) return '';
+      const partes = fechaStr.split('-');
+      if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      return fechaStr;
+    }
+    function obtenerDiaSemana(fechaStr) {
+      if (!fechaStr) return '';
+      const partes = fechaStr.split('-');
+      if (partes.length !== 3) return '';
+      const fecha = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]));
+      const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+      return dias[fecha.getDay()];
+    }
+    function formatearFechaHoraActual() {
+      const now = new Date();
+      const dd = String(now.getDate()).padStart(2,'0');
+      const mm = String(now.getMonth()+1).padStart(2,'0');
+      const yyyy = now.getFullYear();
+      const hh = String(now.getHours()).padStart(2,'0');
+      const min = String(now.getMinutes()).padStart(2,'0');
+      return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+    }
+    function escapeHtml(texto) {
+      if (!texto) return '';
+      const div = document.createElement('div');
+      div.textContent = texto;
+      return div.innerHTML;
+    }
+    function claseEstado(estado) {
+      if (!estado) return 'estado-pendiente';
+      switch(estado) {
+        case 'cumplido': return 'estado-cumplido';
+        case 'reprogramado': return 'estado-reprogramado';
+        case 'suspendido': return 'estado-suspendido';
+        case 'finalizado': return 'estado-finalizado';
+        default: return 'estado-pendiente';
+      }
+    }
+
+    // ===== FILTRADO Y PAGINACIÓN =====
+    function getFilteredData() {
+      return audiencias.filter(item => {
+        if (filterAbogado && item.abogado !== filterAbogado) return false;
+        if (filterFecha && item.fecha !== filterFecha) return false;
+        return true;
+      });
+    }
+    function getPaginatedData(filtered) {
+      const start = (currentPage - 1) * RECORDS_PER_PAGE;
+      const end = start + RECORDS_PER_PAGE;
+      return filtered.slice(start, end);
+    }
+
+    // ===== RENDERIZADO =====
+    function renderizarTabla() {
+      const filtered = getFilteredData();
+      const total = filtered.length;
+      totalPages = Math.max(1, Math.ceil(total / RECORDS_PER_PAGE));
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const pageData = getPaginatedData(filtered);
+      let html = '';
+      pageData.forEach((item) => {
+        const fechaFormateada = formatearFecha(item.fecha);
+        const diaSemana = obtenerDiaSemana(item.fecha);
+        const abogadoActual = item.abogado || '';
+        const estadoActual = item.estado || '';
+        const estadoLabel = estadoActual ? estadoActual.charAt(0).toUpperCase()+estadoActual.slice(1) : '—';
+        const docId = item.id;
+
+        let abogadoOptions = '<option value="">Seleccionar</option>';
+        ABOGADOS.forEach(nombre => {
+          const selected = (nombre === abogadoActual) ? 'selected' : '';
+          abogadoOptions += `<option value="${escapeHtml(nombre)}" ${selected}>${escapeHtml(nombre)}</option>`;
+        });
+
+        const estados = ['suspendido','finalizado','cumplido','reprogramado','pendiente'];
+        let estadoOptions = '<option value="">Seleccionar</option>';
+        estados.forEach(est => {
+          const selected = (est === estadoActual) ? 'selected' : '';
+          const label = est.charAt(0).toUpperCase()+est.slice(1);
+          estadoOptions += `<option value="${est}" ${selected}>${label}</option>`;
+        });
+
+        html += `
+          <tr data-id="${docId}">
+            <td><strong>${diaSemana}</strong></td>
+            <td><strong>${fechaFormateada}</strong></td>
+            <td>${item.hora}</td>
+            <td>${escapeHtml(item.legajo)}</td>
+            <td>${escapeHtml(item.representado)}</td>
+            <td>
+              <select class="select-abogado" data-id="${docId}" data-campo="abogado">
+                ${abogadoOptions}
+              </select>
+            </td>
+            <td>
+              <select class="select-estado" data-id="${docId}" data-campo="estado">
+                ${estadoOptions}
+              </select>
+              <span class="${claseEstado(estadoActual)}" style="display:inline-block; margin-left:0.3rem;">${estadoLabel}</span>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+      totalCount.textContent = total;
+
+      document.querySelectorAll('.select-abogado').forEach(sel => {
+        sel.addEventListener('change', function(e) {
+          const docId = this.dataset.id;
+          const nuevoValor = this.value;
+          if (docId) actualizarCampo(docId, 'abogado', nuevoValor);
+        });
+      });
+      document.querySelectorAll('.select-estado').forEach(sel => {
+        sel.addEventListener('change', function(e) {
+          const docId = this.dataset.id;
+          const nuevoValor = this.value;
+          if (docId) actualizarCampo(docId, 'estado', nuevoValor);
+        });
+      });
+
+      actualizarPaginacion(total);
+    }
+
+    function actualizarPaginacion(total) {
+      const start = (currentPage - 1) * RECORDS_PER_PAGE + 1;
+      const end = Math.min(currentPage * RECORDS_PER_PAGE, total);
+      pageInfo.textContent = total > 0 ? `Mostrando ${start}-${end} de ${total}` : 'No hay registros';
+      prevPageBtn.disabled = currentPage === 1;
+      nextPageBtn.disabled = currentPage === totalPages;
+
+      let numsHtml = '';
+      const maxVisible = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisible/2));
+      let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+      if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
+      for (let i = startPage; i <= endPage; i++) {
+        const active = i === currentPage ? 'active' : '';
+        numsHtml += `<button class="page-num ${active}" data-page="${i}">${i}</button>`;
+      }
+      pageNumbers.innerHTML = numsHtml;
+      document.querySelectorAll('.page-num').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const page = parseInt(this.dataset.page, 10);
+          if (page !== currentPage) { currentPage = page; renderizarTabla(); }
+        });
+      });
+    }
+
+    // ===== OPERACIONES FIRESTORE =====
+    async function actualizarCampo(docId, campo, valor) {
+      try {
+        await coleccionRef.doc(docId).update({ [campo]: valor });
+      } catch (error) {
+        console.error('Error al actualizar:', error);
+        alert('Error al actualizar el registro.');
+      }
+    }
+    async function agregarRegistro(datos) {
+      try {
+        await coleccionRef.add(datos);
+      } catch (error) {
+        console.error('Error al agregar:', error);
+        alert('Error al guardar el registro.');
+      }
+    }
+    async function resetearTodos() {
+      if (!confirm('¿Restablecer todos los abogados y estados a valores vacíos?')) return;
+      try {
+        const snapshot = await coleccionRef.get();
+        const batch = db.batch();
+        snapshot.forEach(doc => batch.update(doc.ref, { abogado: DEFAULT_ABOGADO, estado: '' }));
+        await batch.commit();
+      } catch (error) {
+        console.error('Error al restablecer:', error);
+        alert('Error al restablecer.');
+      }
+    }
+
+    // ===== SUSCRIPCIÓN EN TIEMPO REAL =====
+    function iniciarSuscripcion() {
+      coleccionRef.orderBy('fecha', 'asc').onSnapshot((snapshot) => {
+        const lista = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          lista.push({
+            id: doc.id,
+            fecha: data.fecha || '',
+            hora: data.hora || '',
+            legajo: data.legajo || '',
+            representado: data.representado || '',
+            abogado: data.abogado || DEFAULT_ABOGADO,
+            estado: data.estado || ''
+          });
+        });
+        audiencias = lista;
+        renderizarTabla();
+      }, (error) => {
+        console.error('Error en la suscripción:', error);
+        alert('Error al cargar los datos desde Firestore.');
+      });
+    }
+
+    // ===== CALENDARIO =====
+    function renderCalendar(year, month) {
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+      const countByDate = {};
+      audiencias.forEach(item => { if (item.fecha) countByDate[item.fecha] = (countByDate[item.fecha] || 0) + 1; });
+      let html = '';
+      const weekDays = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+      weekDays.forEach(d => html += `<div class="calendar-weekday">${d}</div>`);
+      for (let i = 0; i < firstDay; i++) html += `<div class="calendar-day empty"></div>`;
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const count = countByDate[dateStr] || 0;
+        const hasAudiencias = count > 0;
+        html += `<div class="calendar-day ${hasAudiencias ? 'has-audiencias' : ''}" data-date="${dateStr}" data-count="${count}"><div class="day-number">${d}</div>${count > 0 ? `<div class="day-badge">${count}</div>` : ''}</div>`;
+      }
+      calendarGrid.innerHTML = html;
+      monthYear.textContent = `${new Date(year, month).toLocaleString('es', { month: 'long', year: 'numeric' })}`;
+      document.querySelectorAll('.calendar-day.has-audiencias').forEach(el => {
+        el.addEventListener('click', function() {
+          const date = this.dataset.date;
+          const audienciasDelDia = audiencias.filter(item => item.fecha === date);
+          if (audienciasDelDia.length === 0) { calendarDetailList.innerHTML = 'No hay audiencias en esta fecha.'; return; }
+          let html2 = '<ul>';
+          audienciasDelDia.forEach(item => {
+            const estadoLabel = item.estado ? item.estado.charAt(0).toUpperCase()+item.estado.slice(1) : '—';
+            const clase = claseEstado(item.estado);
+            html2 += `<li><span>${escapeHtml(item.hora)} - ${escapeHtml(item.representado)} (${escapeHtml(item.legajo)})</span><span class="detalle-estado ${clase}">${estadoLabel}</span></li>`;
+          });
+          html2 += '</ul>';
+          calendarDetailList.innerHTML = html2;
+        });
+      });
+    }
+
+    function abrirCalendario() {
+      const now = new Date();
+      calendarCurrentDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      renderCalendar(calendarCurrentDate.getFullYear(), calendarCurrentDate.getMonth());
+      calendarDetailList.innerHTML = 'Seleccione una fecha para ver los detalles.';
+      calendarModal.classList.add('active');
+    }
+    function cerrarCalendario() { calendarModal.classList.remove('active'); }
+    document.getElementById('prevMonth').addEventListener('click', function() {
+      calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1);
+      renderCalendar(calendarCurrentDate.getFullYear(), calendarCurrentDate.getMonth());
+      calendarDetailList.innerHTML = 'Seleccione una fecha para ver los detalles.';
+    });
+    document.getElementById('nextMonth').addEventListener('click', function() {
+      calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
+      renderCalendar(calendarCurrentDate.getFullYear(), calendarCurrentDate.getMonth());
+      calendarDetailList.innerHTML = 'Seleccione una fecha para ver los detalles.';
+    });
+
+    // ===== REPORTE MENSUAL =====
+    function generarReporte(year, month) {
+      const mesStr = `${year}-${String(month+1).padStart(2,'0')}`;
+      const audienciasMes = audiencias.filter(item => item.fecha && item.fecha.startsWith(mesStr));
+      const estados = {}, abogados = {};
+      audienciasMes.forEach(item => {
+        const estado = item.estado || 'sin estado';
+        estados[estado] = (estados[estado] || 0) + 1;
+        const abog = item.abogado || 'No asignado';
+        abogados[abog] = (abogados[abog] || 0) + 1;
+      });
+      const estadoLabels = { 'suspendido':'Suspendido','finalizado':'Finalizado','cumplido':'Cumplido','reprogramado':'Reprogramado','pendiente':'Pendiente','sin estado':'Sin estado' };
+      const estadoColors = { 'suspendido':'suspendido','finalizado':'finalizado','cumplido':'cumplido','reprogramado':'reprogramado','pendiente':'pendiente','sin estado':'pendiente' };
+      let estadoHtml = '';
+      for (const [key, count] of Object.entries(estados)) {
+        const label = estadoLabels[key] || key;
+        const color = estadoColors[key] || 'pendiente';
+        estadoHtml += `<li><span>${label}</span> <span class="badge-estado ${color}">${count}</span></li>`;
+      }
+      if (Object.keys(estados).length === 0) estadoHtml = '<li>No hay audiencias este mes.</li>';
+      reportEstadoList.innerHTML = estadoHtml;
+
+      let abogadoHtml = '';
+      for (const [key, count] of Object.entries(abogados)) {
+        abogadoHtml += `<li><span>${escapeHtml(key)}</span> <span class="badge-estado pendiente">${count}</span></li>`;
+      }
+      if (Object.keys(abogados).length === 0) abogadoHtml = '<li>No hay audiencias este mes.</li>';
+      reportAbogadoList.innerHTML = abogadoHtml;
+      reportMonthYear.textContent = `${new Date(year, month).toLocaleString('es', { month: 'long', year: 'numeric' })}`;
+    }
+
+    function abrirReporte() {
+      const now = new Date();
+      reportCurrentDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      generarReporte(reportCurrentDate.getFullYear(), reportCurrentDate.getMonth());
+      reportModal.classList.add('active');
+    }
+    function cerrarReporte() { reportModal.classList.remove('active'); }
+    document.getElementById('prevReportMonth').addEventListener('click', function() {
+      reportCurrentDate.setMonth(reportCurrentDate.getMonth() - 1);
+      generarReporte(reportCurrentDate.getFullYear(), reportCurrentDate.getMonth());
+    });
+    document.getElementById('nextReportMonth').addEventListener('click', function() {
+      reportCurrentDate.setMonth(reportCurrentDate.getMonth() + 1);
+      generarReporte(reportCurrentDate.getFullYear(), reportCurrentDate.getMonth());
+    });
+
+    // ===== MODAL NUEVO REGISTRO =====
+    function abrirNuevoRegistro() {
+      const select = document.getElementById('newAbogado');
+      select.innerHTML = '';
+      ABOGADOS.forEach(nombre => {
+        const selected = (nombre === DEFAULT_ABOGADO) ? 'selected' : '';
+        select.innerHTML += `<option value="${escapeHtml(nombre)}" ${selected}>${escapeHtml(nombre)}</option>`;
+      });
+      document.getElementById('newRegForm').reset();
+      // Preseleccionar el abogado por defecto en el select (ya está, pero forzamos)
+      select.value = DEFAULT_ABOGADO;
+      newRegModal.classList.add('active');
+    }
+
+    function cerrarNuevoRegistro() { newRegModal.classList.remove('active'); }
+
+    async function guardarNuevoRegistro(e) {
+      e.preventDefault();
+      const fecha = document.getElementById('newFecha').value;
+      const hora = document.getElementById('newHora').value;
+      const legajo = document.getElementById('newLegajo').value.trim();
+      const representado = document.getElementById('newRepresentado').value.trim();
+      const abogado = document.getElementById('newAbogado').value;
+      const estado = document.getElementById('newEstado').value;
+      if (!fecha || !hora || !legajo || !representado || !abogado || !estado) {
+        alert('Todos los campos son obligatorios.');
+        return;
+      }
+      await agregarRegistro({ fecha, hora, legajo, representado, abogado, estado });
+      cerrarNuevoRegistro();
+    }
+
+    // ===== IMPRESIÓN =====
+    function imprimir() {
+      printDatetime.textContent = `Impreso: ${formatearFechaHoraActual()}`;
+      let html = '';
+      audiencias.forEach(item => {
+        const fechaFormateada = formatearFecha(item.fecha);
+        const diaSemana = obtenerDiaSemana(item.fecha);
+        const abogado = item.abogado || '—';
+        const estado = item.estado ? item.estado.charAt(0).toUpperCase()+item.estado.slice(1) : '—';
+        html += `<tr><td>${diaSemana}</td><td>${fechaFormateada}</td><td>${item.hora}</td><td>${escapeHtml(item.legajo)}</td><td>${escapeHtml(item.representado)}</td><td>${escapeHtml(abogado)}</td><td>${escapeHtml(estado)}</td></tr>`;
+      });
+      printTableBody.innerHTML = html;
+      window.print();
+    }
+
+    // ===== FILTROS =====
+    function aplicarFiltros() {
+      filterAbogado = filterAbogadoEl.value;
+      filterFecha = filterFechaEl.value;
+      currentPage = 1;
+      renderizarTabla();
+    }
+    function limpiarFiltros() {
+      filterAbogadoEl.value = '';
+      filterFechaEl.value = '';
+      filterAbogado = '';
+      filterFecha = '';
+      currentPage = 1;
+      renderizarTabla();
+    }
+
+    // ===== INICIALIZACIÓN =====
+    function init() {
+      let options = '<option value="">Todos</option>';
+      ABOGADOS.forEach(nombre => {
+        const selected = (nombre === DEFAULT_ABOGADO) ? 'selected' : '';
+        options += `<option value="${escapeHtml(nombre)}" ${selected}>${escapeHtml(nombre)}</option>`;
+      });
+      filterAbogadoEl.innerHTML = options;
+      filterAbogado = DEFAULT_ABOGADO;
+      filterFechaEl.value = '';
+      filterFecha = '';
+
+      iniciarSuscripcion();
+
+      prevPageBtn.addEventListener('click', function() { if (currentPage > 1) { currentPage--; renderizarTabla(); } });
+      nextPageBtn.addEventListener('click', function() { if (currentPage < totalPages) { currentPage++; renderizarTabla(); } });
+
+      filterAbogadoEl.addEventListener('change', aplicarFiltros);
+      filterFechaEl.addEventListener('change', aplicarFiltros);
+      clearFiltersBtn.addEventListener('click', limpiarFiltros);
+
+      document.getElementById('newRegBtn').addEventListener('click', abrirNuevoRegistro);
+      document.getElementById('newRegClose').addEventListener('click', cerrarNuevoRegistro);
+      document.getElementById('newRegCancel').addEventListener('click', cerrarNuevoRegistro);
+      document.getElementById('newRegForm').addEventListener('submit', guardarNuevoRegistro);
+
+      document.getElementById('resetBtn').addEventListener('click', resetearTodos);
+      document.getElementById('printBtn').addEventListener('click', imprimir);
+
+      document.getElementById('calendarBtn').addEventListener('click', abrirCalendario);
+      document.getElementById('calendarClose').addEventListener('click', cerrarCalendario);
+
+      document.getElementById('reportBtn').addEventListener('click', abrirReporte);
+      document.getElementById('reportClose').addEventListener('click', cerrarReporte);
+
+      document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+</script>
+
+</body>
+</html>
