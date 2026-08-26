@@ -29,6 +29,8 @@
     .btn-calendar:hover { background:#5a32a3; }
     .btn-report { background:#e6852b; color:#fff; }
     .btn-report:hover { background:#d0741e; }
+    .btn-edit { background:#ffc107; color:#1e2a3a; }
+    .btn-edit:hover { background:#e0a800; }
     .btn:active { transform:scale(0.97); }
     .filters-container { display:flex; flex-wrap:wrap; align-items:flex-end; gap:1.2rem; margin-bottom:1.5rem; padding:1rem 1.2rem; background:#f1f5f9; border-radius:18px; border:1px solid #d0d9e6; }
     .filter-group { display:flex; flex-direction:column; gap:0.3rem; }
@@ -37,19 +39,20 @@
     .filter-group select:focus, .filter-group input:focus { outline:none; border-color:#0a2f5a; box-shadow:0 0 0 3px rgba(10,47,90,0.15); }
     .filter-actions { display:flex; gap:0.6rem; align-items:center; margin-left:auto; }
     .table-responsive { overflow-x:auto; margin-top:0.5rem; border-radius:18px; border:1px solid #cbd5e0; }
-    table { width:100%; border-collapse:collapse; font-size:0.95rem; min-width:750px; }
+    table { width:100%; border-collapse:collapse; font-size:0.95rem; min-width:1000px; }
     thead { background:#0a2f5a; color:#fff; }
     th { padding:1rem 0.9rem; text-align:left; font-weight:500; letter-spacing:0.3px; white-space:nowrap; }
     td { padding:0.8rem 0.9rem; border-bottom:1px solid #e2e8f0; vertical-align:middle; }
     tr:last-child td { border-bottom:none; }
     tbody tr:hover { background:#f1f5f9; }
-    .select-abogado, .select-estado { border:1px solid #bcc9db; border-radius:30px; padding:0.4rem 0.8rem; font-family:'Roboto',sans-serif; font-size:0.9rem; background:#fafcff; cursor:pointer; width:100%; min-width:150px; transition:border 0.2s, box-shadow 0.2s; appearance:auto; }
-    .select-abogado:focus, .select-estado:focus { outline:none; border-color:#0a2f5a; box-shadow:0 0 0 3px rgba(10,47,90,0.2); }
     .estado-cumplido { color:#198754; font-weight:700; }
     .estado-reprogramado { color:#6f42c1; font-weight:500; }
     .estado-suspendido { color:#dc3545; font-weight:500; }
     .estado-finalizado { color:#0d6efd; font-weight:500; }
     .estado-pendiente { color:#6c757d; font-weight:400; }
+    .acuerdo-total { color:#198754; font-weight:700; }
+    .acuerdo-parcial { color:#e6852b; font-weight:700; }
+    .acuerdo-vacio { color:#6c757d; font-weight:400; }
     .table-footer { display:flex; justify-content:space-between; align-items:center; margin-top:1rem; font-size:0.9rem; color:#3a4a5a; flex-wrap:wrap; gap:0.5rem; }
     .badge-count { background:#0a2f5a; color:#fff; padding:0.2rem 0.8rem; border-radius:60px; font-weight:500; }
     .pagination-wrapper { display:flex; justify-content:center; align-items:center; gap:0.8rem; margin-top:1.5rem; flex-wrap:wrap; }
@@ -70,8 +73,9 @@
     .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem 1.5rem; }
     .form-group { display:flex; flex-direction:column; gap:0.3rem; }
     .form-group label { font-weight:500; font-size:0.9rem; color:#1e2a3a; }
-    .form-group input, .form-group select { padding:0.6rem 0.8rem; border:1px solid #bcc9db; border-radius:30px; font-family:'Roboto',sans-serif; font-size:0.95rem; background:#fafcff; transition:border 0.2s; }
-    .form-group input:focus, .form-group select:focus { outline:none; border-color:#0a2f5a; box-shadow:0 0 0 3px rgba(10,47,90,0.15); }
+    .form-group input, .form-group select, .form-group textarea { padding:0.6rem 0.8rem; border:1px solid #bcc9db; border-radius:30px; font-family:'Roboto',sans-serif; font-size:0.95rem; background:#fafcff; transition:border 0.2s; }
+    .form-group textarea { border-radius:18px; resize:vertical; min-height:60px; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline:none; border-color:#0a2f5a; box-shadow:0 0 0 3px rgba(10,47,90,0.15); }
     .form-actions { grid-column:1/-1; display:flex; justify-content:flex-end; gap:0.8rem; margin-top:0.5rem; }
     .calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:0.5rem; margin:1rem 0; }
     .calendar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
@@ -90,7 +94,7 @@
     .calendar-detail-panel ul { list-style:none; padding:0; }
     .calendar-detail-panel ul li { padding:0.3rem 0; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; font-size:0.9rem; }
     .calendar-detail-panel ul li .detalle-estado { font-weight:500; }
-    .report-stats { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-top:0.5rem; }
+    .report-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.5rem; margin-top:0.5rem; }
     .report-stats h4 { color:#0a2f5a; margin-bottom:0.5rem; border-bottom:1px solid #e9edf4; padding-bottom:0.3rem; }
     .report-stats ul { list-style:none; padding:0; }
     .report-stats ul li { display:flex; justify-content:space-between; padding:0.3rem 0; border-bottom:1px solid #f0f0f0; font-size:0.9rem; }
@@ -100,6 +104,8 @@
     .badge-estado.cumplido { background:#d4edda; color:#155724; }
     .badge-estado.reprogramado { background:#e8d4f5; color:#4a148c; }
     .badge-estado.pendiente { background:#e2e3e5; color:#383d41; }
+    .badge-estado.acuerdo-total { background:#d4edda; color:#155724; }
+    .badge-estado.acuerdo-parcial { background:#fff3cd; color:#856404; }
     .report-month-nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
     .print-container { display:none; }
 
@@ -112,7 +118,6 @@
       .filter-group select, .filter-group input { min-width:100%; }
       .filter-actions { margin-left:0; }
       th, td { padding:0.5rem 0.4rem; font-size:0.85rem; }
-      .select-abogado, .select-estado { min-width:100px; font-size:0.8rem; padding:0.3rem 0.5rem; }
       .form-grid { grid-template-columns:1fr; }
       .modal-box { padding:1.5rem; }
       .pagination-wrapper { gap:0.4rem; }
@@ -147,10 +152,9 @@
   <div class="header">
     <h1><i class="fas fa-gavel"></i> CEJUME Audiencias-Defensoria Civil y Comercial 6<br /><span style="font-size:0.9rem;font-weight:400;color:#4a5a6a;">Ministerio Público de Misiones</span></h1>
     <div class="header-actions">
-      <button class="btn btn-calendar" id="calendarBtn"><i class="fas fa-calendar-alt"></i> Cejume - Calendario</button>
-      <button class="btn btn-report" id="reportBtn"><i class="fas fa-chart-pie"></i> Cejume - Reporte Mensual</button>
-      <button class="btn btn-success" id="newRegBtn"><i class="fas fa-plus-circle"></i> Cejume - Nuevo Registro</button>
-      <button class="btn btn-secondary" id="resetBtn"><i class="fas fa-undo-alt"></i> Restablecer</button>
+      <button class="btn btn-calendar" id="calendarBtn"><i class="fas fa-calendar-alt"></i> Calendario</button>
+      <button class="btn btn-report" id="reportBtn"><i class="fas fa-chart-pie"></i> Reporte Mensual</button>
+      <button class="btn btn-success" id="newRegBtn"><i class="fas fa-plus-circle"></i> Nuevo Registro</button>
       <button class="btn btn-primary" id="printBtn"><i class="fas fa-print"></i> Imprimir</button>
     </div>
   </div>
@@ -171,7 +175,7 @@
 
   <div class="table-responsive">
     <table id="tablaAudiencias">
-      <thead><tr><th>Día</th><th>Fecha</th><th>Hora</th><th>Legajo</th><th>Representado/a</th><th>Abogado Asignado</th><th>Estado de Mediación</th></tr></thead>
+      <thead><tr><th>Día</th><th>Fecha</th><th>Hora</th><th>Legajo</th><th>Representado/a</th><th>Abogado</th><th>Estado</th><th>Acuerdo</th><th>Observaciones</th><th>Acciones</th></tr></thead>
       <tbody id="tbodyAudiencias"></tbody>
     </table>
   </div>
@@ -185,7 +189,7 @@
 
   <div class="table-footer">
     <span><i class="fas fa-list-ul"></i> Total: <span class="badge-count" id="totalCount">0</span> audiencias</span>
-    <span class="no-print" style="color:#6c8db0;"><i class="fas fa-info-circle"></i> Edite los campos directamente</span>
+    <span class="no-print" style="color:#6c8db0;"><i class="fas fa-info-circle"></i> Los datos se muestran en modo lectura. Use el lápiz para editar.</span>
   </div>
 </div>
 
@@ -193,7 +197,7 @@
 <div class="print-container" id="printContainer">
   <div class="print-header"><h2><i class="fas fa-gavel"></i> CEJUME · Defensoría Civil 6</h2><span class="print-datetime" id="printDatetime"></span></div>
   <div class="print-table-wrap">
-    <table><thead><tr><th>Día</th><th>Fecha</th><th>Hora</th><th>Legajo</th><th>Representado/a</th><th>Abogado Asignado</th><th>Estado</th></tr></thead><tbody id="printTableBody"></tbody></table>
+    <table><thead><tr><th>Día</th><th>Fecha</th><th>Hora</th><th>Legajo</th><th>Representado/a</th><th>Abogado</th><th>Estado</th><th>Acuerdo</th><th>Observaciones</th></tr></thead><tbody id="printTableBody"></tbody></table>
   </div>
 </div>
 
@@ -201,7 +205,7 @@
 <div class="modal-overlay" id="newRegModal">
   <div class="modal-box">
     <button class="modal-close" id="newRegClose">&times;</button>
-    <h2><i class="fas fa-plus-circle"></i> Cejume - Nueva Audiencia</h2>
+    <h2><i class="fas fa-plus-circle"></i> Nueva Audiencia</h2>
     <form id="newRegForm" class="form-grid">
       <div class="form-group"><label for="newFecha">Fecha</label><input type="date" id="newFecha" required /></div>
       <div class="form-group"><label for="newHora">Hora</label><input type="time" id="newHora" required /></div>
@@ -218,9 +222,59 @@
           <option value="pendiente">Pendiente</option>
         </select>
       </div>
+      <div class="form-group"><label for="newAcuerdo">Acuerdo Arribado</label>
+        <select id="newAcuerdo">
+          <option value="">Seleccionar</option>
+          <option value="total">Total</option>
+          <option value="parcial">Parcial</option>
+        </select>
+      </div>
+      <div class="form-group" style="grid-column:1/-1;"><label for="newObservaciones">Observaciones</label>
+        <textarea id="newObservaciones" rows="2" placeholder="Notas adicionales..."></textarea>
+      </div>
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" id="newRegCancel">Cancelar</button>
         <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL EDITAR REGISTRO -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <button class="modal-close" id="editClose">&times;</button>
+    <h2><i class="fas fa-edit"></i> Editar Audiencia</h2>
+    <form id="editForm" class="form-grid">
+      <input type="hidden" id="editId" />
+      <div class="form-group"><label for="editFecha">Fecha</label><input type="date" id="editFecha" required /></div>
+      <div class="form-group"><label for="editHora">Hora</label><input type="time" id="editHora" required /></div>
+      <div class="form-group"><label for="editLegajo">Legajo</label><input type="text" id="editLegajo" placeholder="Ej. 123456/2026" required /></div>
+      <div class="form-group"><label for="editRepresentado">Representado/a</label><input type="text" id="editRepresentado" placeholder="Nombre completo" required /></div>
+      <div class="form-group"><label for="editAbogado">Abogado Asignado</label><select id="editAbogado" required></select></div>
+      <div class="form-group"><label for="editEstado">Estado de Mediación</label>
+        <select id="editEstado" required>
+          <option value="">Seleccionar</option>
+          <option value="suspendido">Suspendido</option>
+          <option value="finalizado">Finalizado</option>
+          <option value="cumplido">Cumplido</option>
+          <option value="reprogramado">Reprogramado</option>
+          <option value="pendiente">Pendiente</option>
+        </select>
+      </div>
+      <div class="form-group"><label for="editAcuerdo">Acuerdo Arribado</label>
+        <select id="editAcuerdo">
+          <option value="">Seleccionar</option>
+          <option value="total">Total</option>
+          <option value="parcial">Parcial</option>
+        </select>
+      </div>
+      <div class="form-group" style="grid-column:1/-1;"><label for="editObservaciones">Observaciones</label>
+        <textarea id="editObservaciones" rows="2" placeholder="Notas adicionales..."></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" id="editCancel">Cancelar</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Actualizar</button>
       </div>
     </form>
   </div>
@@ -230,7 +284,7 @@
 <div class="modal-overlay" id="calendarModal">
   <div class="modal-box" style="max-width:850px;">
     <button class="modal-close" id="calendarClose">&times;</button>
-    <h2><i class="fas fa-calendar-alt"></i> Cejume - Calendario de Audiencias</h2>
+    <h2><i class="fas fa-calendar-alt"></i> Calendario de Audiencias</h2>
     <div class="calendar-header">
       <button class="btn-nav" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
       <span class="month-year" id="monthYear">Mes Año</span>
@@ -245,7 +299,7 @@
 <div class="modal-overlay" id="reportModal">
   <div class="modal-box" style="max-width:750px;">
     <button class="modal-close" id="reportClose">&times;</button>
-    <h2><i class="fas fa-chart-pie"></i> Cejume - Reporte Mensual</h2>
+    <h2><i class="fas fa-chart-pie"></i> Reporte Mensual</h2>
     <div class="report-month-nav">
       <button class="btn-nav" id="prevReportMonth"><i class="fas fa-chevron-left"></i></button>
       <span class="month-year" id="reportMonthYear">Mes Año</span>
@@ -254,6 +308,7 @@
     <div class="report-stats" id="reportStats">
       <div><h4>Estados de Mediación</h4><ul id="reportEstadoList"></ul></div>
       <div><h4>Audiencias por Abogado</h4><ul id="reportAbogadoList"></ul></div>
+      <div><h4>Acuerdos Arribados</h4><ul id="reportAcuerdoList"></ul></div>
     </div>
   </div>
 </div>
@@ -302,6 +357,7 @@
     const nextPageBtn = document.getElementById('nextPage');
 
     const newRegModal = document.getElementById('newRegModal');
+    const editModal = document.getElementById('editModal');
     const calendarModal = document.getElementById('calendarModal');
     const reportModal = document.getElementById('reportModal');
     const calendarGrid = document.getElementById('calendarGrid');
@@ -316,6 +372,7 @@
     const reportMonthYear = document.getElementById('reportMonthYear');
     const reportEstadoList = document.getElementById('reportEstadoList');
     const reportAbogadoList = document.getElementById('reportAbogadoList');
+    const reportAcuerdoList = document.getElementById('reportAcuerdoList');
     let reportCurrentDate = new Date();
 
     // ===== AUXILIARES =====
@@ -358,6 +415,18 @@
         default: return 'estado-pendiente';
       }
     }
+    function claseAcuerdo(acuerdo) {
+      if (!acuerdo) return 'acuerdo-vacio';
+      if (acuerdo === 'total') return 'acuerdo-total';
+      if (acuerdo === 'parcial') return 'acuerdo-parcial';
+      return 'acuerdo-vacio';
+    }
+    function etiquetaAcuerdo(acuerdo) {
+      if (!acuerdo) return '—';
+      if (acuerdo === 'total') return 'Total';
+      if (acuerdo === 'parcial') return 'Parcial';
+      return acuerdo;
+    }
 
     // ===== FILTRADO Y PAGINACIÓN =====
     function getFilteredData() {
@@ -386,24 +455,12 @@
       pageData.forEach((item) => {
         const fechaFormateada = formatearFecha(item.fecha);
         const diaSemana = obtenerDiaSemana(item.fecha);
-        const abogadoActual = item.abogado || '';
-        const estadoActual = item.estado || '';
-        const estadoLabel = estadoActual ? estadoActual.charAt(0).toUpperCase()+estadoActual.slice(1) : '—';
+        const abogado = item.abogado || '—';
+        const estado = item.estado || '';
+        const estadoLabel = estado ? estado.charAt(0).toUpperCase()+estado.slice(1) : '—';
+        const acuerdo = etiquetaAcuerdo(item.acuerdo);
+        const observaciones = item.observaciones || '';
         const docId = item.id;
-
-        let abogadoOptions = '<option value="">Seleccionar</option>';
-        ABOGADOS.forEach(nombre => {
-          const selected = (nombre === abogadoActual) ? 'selected' : '';
-          abogadoOptions += `<option value="${escapeHtml(nombre)}" ${selected}>${escapeHtml(nombre)}</option>`;
-        });
-
-        const estados = ['suspendido','finalizado','cumplido','reprogramado','pendiente'];
-        let estadoOptions = '<option value="">Seleccionar</option>';
-        estados.forEach(est => {
-          const selected = (est === estadoActual) ? 'selected' : '';
-          const label = est.charAt(0).toUpperCase()+est.slice(1);
-          estadoOptions += `<option value="${est}" ${selected}>${label}</option>`;
-        });
 
         html += `
           <tr data-id="${docId}">
@@ -412,16 +469,12 @@
             <td>${item.hora}</td>
             <td>${escapeHtml(item.legajo)}</td>
             <td>${escapeHtml(item.representado)}</td>
+            <td>${escapeHtml(abogado)}</td>
+            <td><span class="${claseEstado(estado)}">${estadoLabel}</span></td>
+            <td><span class="${claseAcuerdo(item.acuerdo)}">${acuerdo}</span></td>
+            <td>${escapeHtml(observaciones)}</td>
             <td>
-              <select class="select-abogado" data-id="${docId}" data-campo="abogado">
-                ${abogadoOptions}
-              </select>
-            </td>
-            <td>
-              <select class="select-estado" data-id="${docId}" data-campo="estado">
-                ${estadoOptions}
-              </select>
-              <span class="${claseEstado(estadoActual)}" style="display:inline-block; margin-left:0.3rem;">${estadoLabel}</span>
+              <button class="btn btn-edit btn-sm edit-btn" data-id="${docId}" style="padding:0.3rem 0.7rem; font-size:0.9rem;"><i class="fas fa-pencil-alt"></i> Editar</button>
             </td>
           </tr>
         `;
@@ -430,18 +483,11 @@
       tbody.innerHTML = html;
       totalCount.textContent = total;
 
-      document.querySelectorAll('.select-abogado').forEach(sel => {
-        sel.addEventListener('change', function(e) {
-          const docId = this.dataset.id;
-          const nuevoValor = this.value;
-          if (docId) actualizarCampo(docId, 'abogado', nuevoValor);
-        });
-      });
-      document.querySelectorAll('.select-estado').forEach(sel => {
-        sel.addEventListener('change', function(e) {
-          const docId = this.dataset.id;
-          const nuevoValor = this.value;
-          if (docId) actualizarCampo(docId, 'estado', nuevoValor);
+      // Asignar eventos a los botones editar
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.dataset.id;
+          abrirEdicion(id);
         });
       });
 
@@ -474,14 +520,6 @@
     }
 
     // ===== OPERACIONES FIRESTORE =====
-    async function actualizarCampo(docId, campo, valor) {
-      try {
-        await coleccionRef.doc(docId).update({ [campo]: valor });
-      } catch (error) {
-        console.error('Error al actualizar:', error);
-        alert('Error al actualizar el registro.');
-      }
-    }
     async function agregarRegistro(datos) {
       try {
         await coleccionRef.add(datos);
@@ -490,16 +528,22 @@
         alert('Error al guardar el registro.');
       }
     }
-    async function resetearTodos() {
-      if (!confirm('¿Restablecer todos los abogados y estados a valores vacíos?')) return;
+    async function actualizarRegistro(id, datos) {
       try {
-        const snapshot = await coleccionRef.get();
-        const batch = db.batch();
-        snapshot.forEach(doc => batch.update(doc.ref, { abogado: DEFAULT_ABOGADO, estado: '' }));
-        await batch.commit();
+        await coleccionRef.doc(id).update(datos);
       } catch (error) {
-        console.error('Error al restablecer:', error);
-        alert('Error al restablecer.');
+        console.error('Error al actualizar:', error);
+        alert('Error al actualizar el registro.');
+      }
+    }
+    async function obtenerRegistro(id) {
+      try {
+        const doc = await coleccionRef.doc(id).get();
+        if (doc.exists) return { id: doc.id, ...doc.data() };
+        else return null;
+      } catch (error) {
+        console.error('Error al obtener:', error);
+        return null;
       }
     }
 
@@ -516,7 +560,9 @@
             legajo: data.legajo || '',
             representado: data.representado || '',
             abogado: data.abogado || DEFAULT_ABOGADO,
-            estado: data.estado || ''
+            estado: data.estado || '',
+            acuerdo: data.acuerdo || '',
+            observaciones: data.observaciones || ''
           });
         });
         audiencias = lista;
@@ -531,8 +577,6 @@
     function renderCalendar(year, month) {
       const firstDay = new Date(year, month, 1).getDay();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const today = new Date();
-      const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
       const countByDate = {};
       audiencias.forEach(item => { if (item.fecha) countByDate[item.fecha] = (countByDate[item.fecha] || 0) + 1; });
       let html = '';
@@ -556,7 +600,9 @@
           audienciasDelDia.forEach(item => {
             const estadoLabel = item.estado ? item.estado.charAt(0).toUpperCase()+item.estado.slice(1) : '—';
             const clase = claseEstado(item.estado);
-            html2 += `<li><span>${escapeHtml(item.hora)} - ${escapeHtml(item.representado)} (${escapeHtml(item.legajo)})</span><span class="detalle-estado ${clase}">${estadoLabel}</span></li>`;
+            const acuerdoLabel = etiquetaAcuerdo(item.acuerdo);
+            const claseAc = claseAcuerdo(item.acuerdo);
+            html2 += `<li><span>${escapeHtml(item.hora)} - ${escapeHtml(item.representado)} (${escapeHtml(item.legajo)})</span><span class="detalle-estado ${clase}">${estadoLabel}</span> <span class="${claseAc}">${acuerdoLabel}</span></li>`;
           });
           html2 += '</ul>';
           calendarDetailList.innerHTML = html2;
@@ -587,12 +633,15 @@
     function generarReporte(year, month) {
       const mesStr = `${year}-${String(month+1).padStart(2,'0')}`;
       const audienciasMes = audiencias.filter(item => item.fecha && item.fecha.startsWith(mesStr));
-      const estados = {}, abogados = {};
+      const estados = {}, abogados = {}, acuerdos = { total: 0, parcial: 0 };
       audienciasMes.forEach(item => {
         const estado = item.estado || 'sin estado';
         estados[estado] = (estados[estado] || 0) + 1;
         const abog = item.abogado || 'No asignado';
         abogados[abog] = (abogados[abog] || 0) + 1;
+        const acuerdo = item.acuerdo || '';
+        if (acuerdo === 'total') acuerdos.total++;
+        else if (acuerdo === 'parcial') acuerdos.parcial++;
       });
       const estadoLabels = { 'suspendido':'Suspendido','finalizado':'Finalizado','cumplido':'Cumplido','reprogramado':'Reprogramado','pendiente':'Pendiente','sin estado':'Sin estado' };
       const estadoColors = { 'suspendido':'suspendido','finalizado':'finalizado','cumplido':'cumplido','reprogramado':'reprogramado','pendiente':'pendiente','sin estado':'pendiente' };
@@ -611,6 +660,16 @@
       }
       if (Object.keys(abogados).length === 0) abogadoHtml = '<li>No hay audiencias este mes.</li>';
       reportAbogadoList.innerHTML = abogadoHtml;
+
+      let acuerdoHtml = '';
+      const totalAcuerdos = acuerdos.total + acuerdos.parcial;
+      if (totalAcuerdos === 0) {
+        acuerdoHtml = '<li>No hay acuerdos registrados este mes.</li>';
+      } else {
+        acuerdoHtml += `<li><span>Total</span> <span class="badge-estado acuerdo-total">${acuerdos.total}</span></li>`;
+        acuerdoHtml += `<li><span>Parcial</span> <span class="badge-estado acuerdo-parcial">${acuerdos.parcial}</span></li>`;
+      }
+      reportAcuerdoList.innerHTML = acuerdoHtml;
       reportMonthYear.textContent = `${new Date(year, month).toLocaleString('es', { month: 'long', year: 'numeric' })}`;
     }
 
@@ -639,8 +698,9 @@
         select.innerHTML += `<option value="${escapeHtml(nombre)}" ${selected}>${escapeHtml(nombre)}</option>`;
       });
       document.getElementById('newRegForm').reset();
-      // Preseleccionar el abogado por defecto en el select (ya está, pero forzamos)
       select.value = DEFAULT_ABOGADO;
+      document.getElementById('newAcuerdo').value = '';
+      document.getElementById('newObservaciones').value = '';
       newRegModal.classList.add('active');
     }
 
@@ -654,12 +714,59 @@
       const representado = document.getElementById('newRepresentado').value.trim();
       const abogado = document.getElementById('newAbogado').value;
       const estado = document.getElementById('newEstado').value;
+      const acuerdo = document.getElementById('newAcuerdo').value;
+      const observaciones = document.getElementById('newObservaciones').value.trim();
       if (!fecha || !hora || !legajo || !representado || !abogado || !estado) {
-        alert('Todos los campos son obligatorios.');
+        alert('Todos los campos son obligatorios excepto Acuerdo y Observaciones.');
         return;
       }
-      await agregarRegistro({ fecha, hora, legajo, representado, abogado, estado });
+      await agregarRegistro({ fecha, hora, legajo, representado, abogado, estado, acuerdo, observaciones });
       cerrarNuevoRegistro();
+    }
+
+    // ===== MODAL EDITAR =====
+    async function abrirEdicion(id) {
+      const datos = await obtenerRegistro(id);
+      if (!datos) { alert('No se encontró el registro.'); return; }
+      document.getElementById('editId').value = id;
+      document.getElementById('editFecha').value = datos.fecha || '';
+      document.getElementById('editHora').value = datos.hora || '';
+      document.getElementById('editLegajo').value = datos.legajo || '';
+      document.getElementById('editRepresentado').value = datos.representado || '';
+      document.getElementById('editEstado').value = datos.estado || '';
+      document.getElementById('editAcuerdo').value = datos.acuerdo || '';
+      document.getElementById('editObservaciones').value = datos.observaciones || '';
+
+      // Llenar select de abogados
+      const select = document.getElementById('editAbogado');
+      select.innerHTML = '';
+      ABOGADOS.forEach(nombre => {
+        const selected = (nombre === datos.abogado) ? 'selected' : '';
+        select.innerHTML += `<option value="${escapeHtml(nombre)}" ${selected}>${escapeHtml(nombre)}</option>`;
+      });
+
+      editModal.classList.add('active');
+    }
+
+    function cerrarEdicion() { editModal.classList.remove('active'); }
+
+    async function guardarEdicion(e) {
+      e.preventDefault();
+      const id = document.getElementById('editId').value;
+      const fecha = document.getElementById('editFecha').value;
+      const hora = document.getElementById('editHora').value;
+      const legajo = document.getElementById('editLegajo').value.trim();
+      const representado = document.getElementById('editRepresentado').value.trim();
+      const abogado = document.getElementById('editAbogado').value;
+      const estado = document.getElementById('editEstado').value;
+      const acuerdo = document.getElementById('editAcuerdo').value;
+      const observaciones = document.getElementById('editObservaciones').value.trim();
+      if (!fecha || !hora || !legajo || !representado || !abogado || !estado) {
+        alert('Todos los campos son obligatorios excepto Acuerdo y Observaciones.');
+        return;
+      }
+      await actualizarRegistro(id, { fecha, hora, legajo, representado, abogado, estado, acuerdo, observaciones });
+      cerrarEdicion();
     }
 
     // ===== IMPRESIÓN =====
@@ -671,7 +778,10 @@
         const diaSemana = obtenerDiaSemana(item.fecha);
         const abogado = item.abogado || '—';
         const estado = item.estado ? item.estado.charAt(0).toUpperCase()+item.estado.slice(1) : '—';
-        html += `<tr><td>${diaSemana}</td><td>${fechaFormateada}</td><td>${item.hora}</td><td>${escapeHtml(item.legajo)}</td><td>${escapeHtml(item.representado)}</td><td>${escapeHtml(abogado)}</td><td>${escapeHtml(estado)}</td></tr>`;
+        const acuerdo = etiquetaAcuerdo(item.acuerdo);
+        const claseAc = claseAcuerdo(item.acuerdo);
+        const observaciones = item.observaciones || '';
+        html += `<tr><td>${diaSemana}</td><td>${fechaFormateada}</td><td>${item.hora}</td><td>${escapeHtml(item.legajo)}</td><td>${escapeHtml(item.representado)}</td><td>${escapeHtml(abogado)}</td><td>${escapeHtml(estado)}</td><td class="${claseAc}">${escapeHtml(acuerdo)}</td><td>${escapeHtml(observaciones)}</td></tr>`;
       });
       printTableBody.innerHTML = html;
       window.print();
@@ -719,7 +829,10 @@
       document.getElementById('newRegCancel').addEventListener('click', cerrarNuevoRegistro);
       document.getElementById('newRegForm').addEventListener('submit', guardarNuevoRegistro);
 
-      document.getElementById('resetBtn').addEventListener('click', resetearTodos);
+      document.getElementById('editClose').addEventListener('click', cerrarEdicion);
+      document.getElementById('editCancel').addEventListener('click', cerrarEdicion);
+      document.getElementById('editForm').addEventListener('submit', guardarEdicion);
+
       document.getElementById('printBtn').addEventListener('click', imprimir);
 
       document.getElementById('calendarBtn').addEventListener('click', abrirCalendario);
