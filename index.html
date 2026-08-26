@@ -483,7 +483,6 @@
       tbody.innerHTML = html;
       totalCount.textContent = total;
 
-      // Asignar eventos a los botones editar
       document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', function() {
           const id = this.dataset.id;
@@ -547,8 +546,9 @@
       }
     }
 
-    // ===== SUSCRIPCIÓN EN TIEMPO REAL =====
+    // ===== SUSCRIPCIÓN EN TIEMPO REAL (orden cronológico en cliente) =====
     function iniciarSuscripcion() {
+      // Solo ordenamos por fecha en la consulta para evitar índice compuesto
       coleccionRef.orderBy('fecha', 'asc').onSnapshot((snapshot) => {
         const lista = [];
         snapshot.forEach(doc => {
@@ -565,11 +565,16 @@
             observaciones: data.observaciones || ''
           });
         });
+        // Ordenar por fecha y hora en cliente (cronológico)
+        lista.sort((a, b) => {
+          if (a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
+          return (a.hora || '00:00').localeCompare(b.hora || '00:00');
+        });
         audiencias = lista;
         renderizarTabla();
       }, (error) => {
         console.error('Error en la suscripción:', error);
-        alert('Error al cargar los datos desde Firestore.');
+        alert('Error al cargar los datos desde Firestore. Verifique su conexión y permisos.');
       });
     }
 
@@ -737,7 +742,6 @@
       document.getElementById('editAcuerdo').value = datos.acuerdo || '';
       document.getElementById('editObservaciones').value = datos.observaciones || '';
 
-      // Llenar select de abogados
       const select = document.getElementById('editAbogado');
       select.innerHTML = '';
       ABOGADOS.forEach(nombre => {
